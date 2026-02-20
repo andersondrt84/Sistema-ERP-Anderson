@@ -104,7 +104,7 @@ function renderUsers() {
 function renderReports() {
   const totalOrdens = state.orders.length;
   const totalOrdemValor = state.orders.reduce((sum, o) => sum + Number(o.valor), 0);
-  const concluidas = state.orders.filter((o) => o.status === "concluida").length;
+  const concluidas = state.orders.filter((o) => ["concluido","concluida"].includes(o.status)).length;
   const totalCaixa = state.cash.reduce((sum, c) => sum + Number(c.valor), 0);
   const clientesAtendidos = new Set(state.orders.map((o) => o.cliente.trim().toLowerCase())).size;
 

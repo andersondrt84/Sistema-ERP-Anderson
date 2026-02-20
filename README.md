@@ -15,7 +15,7 @@ Projeto backend + interface web para controle de manutenção de computadores em
   - descrição;
   - campo para anexar PDF da descrição do serviço;
   - valor cobrado;
-  - status e data.
+  - status (aberto, aguardando cliente, concluido) e data.
 - Caixa para lançar valores recebidos.
 - Relatórios com total de ordens, clientes atendidos, total cobrado, concluídas e total em caixa.
 
