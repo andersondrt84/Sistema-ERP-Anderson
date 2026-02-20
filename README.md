@@ -18,10 +18,18 @@ Projeto backend para controle de trabalho extra de manutenção de computadores 
 - Rotas de cadastro e listagem protegidas por Bearer Token.
 - Senhas com hash (`bcrypt`).
 
+## Acesso Web (HTTP/HTTPS)
+- O acesso HTTP fica disponível pelo Nginx em `http://localhost`.
+- O acesso HTTPS fica disponível em `https://localhost` via serviço `web-https` (profile `https`).
+- O Nginx encaminha as requisições para a API interna (`api:8000`).
+
 ## Estrutura
-- `docker-compose.yml`: API + PostgreSQL.
+- `docker-compose.yml`: API + PostgreSQL + gateway web (Nginx HTTP/HTTPS).
 - `Dockerfile`: imagem da API FastAPI.
 - `.env.example`: variáveis de ambiente base.
+- `nginx/http.conf`: proxy HTTP para a API.
+- `nginx/https.conf`: proxy HTTPS para a API.
+- `certs/`: pasta para certificados TLS (`fullchain.pem` e `privkey.pem`).
 - `app/`: código da aplicação.
 
 ## Endpoints principais
@@ -31,6 +39,11 @@ Projeto backend para controle de trabalho extra de manutenção de computadores 
 - `POST /clients` e `GET /clients`
 - `POST /service-orders` e `GET /service-orders`
 - `GET /health`
+
+## HTTPS (certificados)
+Para o serviço `web-https`, coloque os arquivos abaixo em `certs/`:
+- `certs/fullchain.pem`
+- `certs/privkey.pem`
 
 ## Observação
 Conforme solicitado, os códigos foram apenas adicionados/atualizados no repositório.
