@@ -31,6 +31,19 @@ function hash(text) {
   return btoa(unescape(encodeURIComponent(text)));
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Falha ao ler PDF"));
+    reader.readAsDataURL(file);
+  });
+}
+
 function findUser(username) {
   return state.users.find((u) => u.user.toLowerCase() === username.toLowerCase());
 }
@@ -61,6 +74,7 @@ function renderOrders() {
       <td>${o.tipoServico}</td>
       <td>${o.status}</td>
       <td>${money(o.valor)}</td>
+      <td>${o.pdfDataUrl ? `<a class="pdf-link" href="${o.pdfDataUrl}" target="_blank" rel="noopener">Abrir PDF</a>` : "-"}</td>
     </tr>`
     )
     .join("");
@@ -144,25 +158,33 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
   }
 });
 
-document.getElementById("orderForm").addEventListener("submit", (e) => {
+document.getElementById("orderForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const order = {
-    id: state.nextOrderId++,
-    cliente: document.getElementById("cliente").value.trim(),
-    equipamento: document.getElementById("equipamento").value.trim(),
-    impressora: document.getElementById("impressora").value,
-    tipoServico: document.getElementById("tipoServico").value,
-    descricao: document.getElementById("descricao").value.trim(),
-    valor: document.getElementById("valor").value,
-    status: document.getElementById("status").value,
-    data: document.getElementById("data").value,
-  };
+  const pdfFile = document.getElementById("descricaoPdf").files[0];
 
-  state.orders.unshift(order);
-  saveState();
-  renderAll();
-  e.target.reset();
-  notify(`Ordem #${order.id} salva com sucesso.`);
+  try {
+    const pdfDataUrl = await fileToDataUrl(pdfFile);
+    const order = {
+      id: state.nextOrderId++,
+      cliente: document.getElementById("cliente").value.trim(),
+      equipamento: document.getElementById("equipamento").value.trim(),
+      impressora: document.getElementById("impressora").value,
+      tipoServico: document.getElementById("tipoServico").value,
+      descricao: document.getElementById("descricao").value.trim(),
+      valor: document.getElementById("valor").value,
+      status: document.getElementById("status").value,
+      data: document.getElementById("data").value,
+      pdfDataUrl,
+    };
+
+    state.orders.unshift(order);
+    saveState();
+    renderAll();
+    e.target.reset();
+    notify(`Ordem #${order.id} salva com sucesso.`);
+  } catch {
+    notify("Não foi possível anexar o PDF da descrição.", false);
+  }
 });
 
 document.getElementById("cashForm").addEventListener("submit", (e) => {

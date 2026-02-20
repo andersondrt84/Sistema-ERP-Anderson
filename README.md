@@ -13,6 +13,7 @@ Projeto backend + interface web para controle de manutenção de computadores em
   - impressora;
   - **tipo de serviço** (Formatação, Instalação do Windows, Configuração de roteador, Conserto, Montagem de computador);
   - descrição;
+  - campo para anexar PDF da descrição do serviço;
   - valor cobrado;
   - status e data.
 - Caixa para lançar valores recebidos.
