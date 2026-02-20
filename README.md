@@ -26,9 +26,13 @@ Projeto backend + interface web para controle de trabalho extra de manutenção 
 - A API fica atrás do Nginx em `/api/*`.
 - Documentação da API: `/docs`.
 
+## Correção do erro de deploy (mount no Nginx)
+Para evitar o erro `not a directory` no deploy (comum em Portainer/Stacks), o serviço web agora usa **imagem custom do Nginx** com os arquivos copiados no build, em vez de bind mount de `nginx/http.conf`.
+
 ## Estrutura
 - `docker-compose.yml`: API + PostgreSQL + gateway web HTTP (Nginx).
 - `Dockerfile`: imagem da API FastAPI.
+- `nginx/Dockerfile`: imagem web (Nginx) com config e frontend embutidos.
 - `.env.example`: variáveis de ambiente base.
 - `nginx/http.conf`: estático + proxy HTTP para frontend/API.
 - `web/index.html` e `web/styles.css`: layout visual do ERP.
