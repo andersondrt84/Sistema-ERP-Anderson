@@ -1,4 +1,4 @@
-const FIXED_USER = "anderson";
+const ADMIN_USER = "anderson";
 
 const state = {
   orders: JSON.parse(localStorage.getItem("erp_orders") || "[]"),
@@ -6,7 +6,7 @@ const state = {
   nextOrderId: Number(localStorage.getItem("erp_next_order_id") || "1"),
   logged: sessionStorage.getItem("erp_logged") === "1",
   currentUser: sessionStorage.getItem("erp_current_user") || "",
-  andersonPassHash: localStorage.getItem("erp_anderson_pass_hash") || "",
+  token: sessionStorage.getItem("erp_token") || "",
 };
 
 const msg = document.getElementById("msg");
@@ -15,11 +15,10 @@ const appSection = document.getElementById("appSection");
 const ordersTable = document.getElementById("ordersTable");
 const cashTable = document.getElementById("cashTable");
 
-function saveState() {
+function saveLocalData() {
   localStorage.setItem("erp_orders", JSON.stringify(state.orders));
   localStorage.setItem("erp_cash", JSON.stringify(state.cash));
   localStorage.setItem("erp_next_order_id", String(state.nextOrderId));
-  localStorage.setItem("erp_anderson_pass_hash", state.andersonPassHash);
 }
 
 function notify(text, ok = true) {
@@ -27,30 +26,39 @@ function notify(text, ok = true) {
   msg.style.color = ok ? "#86efac" : "#fca5a5";
 }
 
-function hash(text) {
-  return btoa(unescape(encodeURIComponent(text)));
+function isAdminUser() {
+  return (state.currentUser || "").toLowerCase().startsWith(ADMIN_USER);
 }
 
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    if (!file) {
-      resolve(null);
-      return;
+function applyAdminVisibility() {
+  const adminTab = document.querySelector('.tab[data-tab="seguranca"]');
+  const adminPanel = document.getElementById("tab-seguranca");
+  const visible = isAdminUser();
+  if (adminTab) adminTab.classList.toggle("hidden", !visible);
+  if (adminPanel) {
+    adminPanel.classList.toggle("hidden", !visible);
+    if (!visible && adminPanel.classList.contains("active")) {
+      adminPanel.classList.remove("active");
+      const defaultTab = document.querySelector('.tab[data-tab="ordens"]');
+      const defaultPanel = document.getElementById('tab-ordens');
+      document.querySelectorAll('.tab[data-tab]').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+      if (defaultTab) defaultTab.classList.add('active');
+      if (defaultPanel) defaultPanel.classList.add('active');
     }
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error("Falha ao ler PDF"));
-    reader.readAsDataURL(file);
-  });
+  }
 }
 
-function setLogged(logged, user = "") {
+function setLogged(logged, user = "", token = "") {
   state.logged = logged;
   state.currentUser = logged ? user : "";
+  state.token = logged ? token : "";
   sessionStorage.setItem("erp_logged", logged ? "1" : "0");
   sessionStorage.setItem("erp_current_user", state.currentUser);
+  sessionStorage.setItem("erp_token", state.token);
   loginSection.classList.toggle("hidden", logged);
   appSection.classList.toggle("hidden", !logged);
+  applyAdminVisibility();
 }
 
 function money(v) {
@@ -146,29 +154,35 @@ function renderAll() {
   renderOrders();
   renderCash();
   renderReports();
+  applyAdminVisibility();
 }
 
-// senha inicial padrão para anderson (se ainda não tiver configurada)
-if (!state.andersonPassHash) {
-  state.andersonPassHash = hash("12345678");
-  saveState();
+async function loginViaApi(username, password) {
+  const form = new URLSearchParams();
+  form.append("username", username);
+  form.append("password", password);
+
+  const resp = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form,
+  });
+
+  if (!resp.ok) throw new Error("Credenciais inválidas");
+  return resp.json();
 }
 
-document.getElementById("loginForm").addEventListener("submit", (e) => {
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const user = document.getElementById("loginUser").value.trim().toLowerCase();
+  const user = document.getElementById("loginUser").value.trim();
   const pass = document.getElementById("loginPass").value;
 
-  if (user !== FIXED_USER) {
-    notify("Acesso permitido apenas para o usuário anderson.", false);
-    return;
-  }
-
-  if (hash(pass) === state.andersonPassHash) {
-    setLogged(true, FIXED_USER);
-    notify("Login efetuado com sucesso.");
-  } else {
-    notify("Senha inválida.", false);
+  try {
+    const result = await loginViaApi(user, pass);
+    setLogged(true, user, result.access_token || "");
+    notify(`Login efetuado com sucesso para ${user}.`);
+  } catch {
+    notify("Usuário ou senha inválidos.", false);
   }
 });
 
@@ -177,7 +191,14 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
   const pdfFile = document.getElementById("descricaoPdf").files[0];
 
   try {
-    const pdfDataUrl = await fileToDataUrl(pdfFile);
+    const pdfDataUrl = await new Promise((resolve, reject) => {
+      if (!pdfFile) return resolve(null);
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Falha ao ler PDF"));
+      reader.readAsDataURL(pdfFile);
+    });
+
     const order = {
       id: state.nextOrderId++,
       cliente: document.getElementById("cliente").value.trim(),
@@ -192,7 +213,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     };
 
     state.orders.unshift(order);
-    saveState();
+    saveLocalData();
     renderAll();
     e.target.reset();
     notify(`Ordem #${order.id} salva com sucesso.`);
@@ -210,7 +231,7 @@ document.getElementById("cashForm").addEventListener("submit", (e) => {
   };
 
   state.cash.unshift(cash);
-  saveState();
+  saveLocalData();
   renderAll();
   e.target.reset();
   notify("Lançamento realizado no caixa.");
@@ -218,23 +239,11 @@ document.getElementById("cashForm").addEventListener("submit", (e) => {
 
 document.getElementById("passForm").addEventListener("submit", (e) => {
   e.preventDefault();
-  const atual = document.getElementById("senhaAtual").value;
-  const nova = document.getElementById("senhaNova").value;
-
-  if (state.currentUser !== FIXED_USER) {
-    notify("Somente o usuário anderson pode alterar a senha.", false);
+  if (!isAdminUser()) {
+    notify("Somente o usuário anderson pode fazer ajustes do sistema.", false);
     return;
   }
-
-  if (hash(atual) !== state.andersonPassHash) {
-    notify("Senha atual incorreta.", false);
-    return;
-  }
-
-  state.andersonPassHash = hash(nova);
-  saveState();
-  e.target.reset();
-  notify("Senha alterada com sucesso.");
+  notify("Ajuste permitido para anderson. (Fluxo de senha deve ser feito pela API).", true);
 });
 
 document.querySelectorAll(".tab[data-tab]").forEach((btn) => {
@@ -246,5 +255,5 @@ document.querySelectorAll(".tab[data-tab]").forEach((btn) => {
   });
 });
 
-setLogged(state.logged && state.currentUser === FIXED_USER, state.currentUser);
+setLogged(state.logged && !!state.currentUser, state.currentUser, state.token);
 renderAll();

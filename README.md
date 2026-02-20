@@ -3,8 +3,8 @@
 Projeto backend + interface web para controle de manutenção de computadores em casa.
 
 ## Funcionalidades web
-- Login com **usuário fixo `anderson`** para evitar acesso indevido por criação livre de contas.
-- Alteração de senha do usuário `anderson` na aba Segurança.
+- Login para qualquer usuário existente no banco de dados (via API `/api/auth/login`).
+- Ajustes do sistema reservados para o usuário `anderson` na interface.
 - Cadastro de ordens com:
   - número automático da OS;
   - cliente;
