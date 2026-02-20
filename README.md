@@ -1,6 +1,6 @@
 # Sistema leve de assistência técnica (Docker + PostgreSQL)
 
-Projeto backend para controle de trabalho extra de manutenção de computadores em casa.
+Projeto backend + interface web para controle de trabalho extra de manutenção de computadores em casa.
 
 ## O que este sistema registra
 - Cadastro de usuários do sistema (com autenticação).
@@ -14,31 +14,34 @@ Projeto backend para controle de trabalho extra de manutenção de computadores 
   - status (`aberta`, `em_andamento`, `concluida`, `cancelada`).
 
 ## Segurança
-- Login com JWT (`/auth/login`).
+- Login com JWT (`/api/auth/login`).
 - Rotas de cadastro e listagem protegidas por Bearer Token.
 - Senhas com hash (`bcrypt`).
 
 ## Acesso Web (HTTP/HTTPS)
-- O acesso HTTP fica disponível pelo Nginx em `http://localhost`.
-- O acesso HTTPS fica disponível em `https://localhost` via serviço `web-https` (profile `https`).
-- O Nginx encaminha as requisições para a API interna (`api:8000`).
+- **HTTP principal na porta 7000**: `http://localhost:7000`
+- HTTPS opcional: `https://localhost:7443` (serviço `web-https`, profile `https`).
+- A interface web tem layout moderno com cores vibrantes em gradiente.
+- A API fica atrás do Nginx em `/api/*`.
+- Documentação da API: `/docs`.
 
 ## Estrutura
 - `docker-compose.yml`: API + PostgreSQL + gateway web (Nginx HTTP/HTTPS).
 - `Dockerfile`: imagem da API FastAPI.
 - `.env.example`: variáveis de ambiente base.
-- `nginx/http.conf`: proxy HTTP para a API.
-- `nginx/https.conf`: proxy HTTPS para a API.
+- `nginx/http.conf`: estático + proxy HTTP para frontend/API.
+- `nginx/https.conf`: estático + proxy HTTPS para frontend/API.
+- `web/index.html` e `web/styles.css`: layout visual do ERP.
 - `certs/`: pasta para certificados TLS (`fullchain.pem` e `privkey.pem`).
 - `app/`: código da aplicação.
 
-## Endpoints principais
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /people` e `GET /people`
-- `POST /clients` e `GET /clients`
-- `POST /service-orders` e `GET /service-orders`
-- `GET /health`
+## Endpoints principais da API (via `/api`)
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/people` e `GET /api/people`
+- `POST /api/clients` e `GET /api/clients`
+- `POST /api/service-orders` e `GET /api/service-orders`
+- `GET /api/health`
 
 ## HTTPS (certificados)
 Para o serviço `web-https`, coloque os arquivos abaixo em `certs/`:
