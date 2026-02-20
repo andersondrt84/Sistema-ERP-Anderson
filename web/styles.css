@@ -1,5 +1,5 @@
 :root {
-  --bg: #f4f7f2;
+  --bg: #b0b5b0;
   --surface: rgba(255, 255, 255, 0.92);
   --text: #243428;
   --muted: #4f6255;
@@ -16,7 +16,7 @@ body {
   min-height: 100vh;
   font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
   color: var(--text);
-  background: linear-gradient(180deg, #f8fbf7 0%, var(--bg) 100%);
+  background: var(--bg);
   display: grid;
   place-items: center;
 }
@@ -72,6 +72,12 @@ p { color: var(--muted); }
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 0.45rem;
+  border-radius: 12px;
+  background: #f0f2f0;
 }
 
 .tab {

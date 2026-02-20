@@ -1,6 +1,6 @@
 # Sistema leve de assistência técnica (Docker + PostgreSQL)
 
-Projeto backend + interface web para controle de manutenção de computadores em casa, com layout mais simples e claro.
+Projeto backend + interface web para controle de manutenção de computadores em casa, com layout mais simples e claro, fundo em cinza médio e botões principais no topo.
 
 ## Funcionalidades web
 - Login para qualquer usuário existente no banco de dados (via API `/api/auth/login`).
