@@ -3,19 +3,20 @@
 Projeto backend + interface web para controle de manutenção de computadores em casa.
 
 ## Funcionalidades web
-- Login na interface com **configuração inicial de usuário/senha** (sem credenciais padrão expostas na tela).
-- Senha armazenada no navegador em formato codificado e opção de **alteração de senha**.
-- Cadastro clicável de ordens de serviço com:
+- Login com **configuração inicial do primeiro usuário** (sem credenciais padrão expostas).
+- Gerenciamento de usuários para criar novos acessos.
+- Alteração de senha para o usuário logado.
+- Cadastro de ordens com:
+  - número automático da OS;
   - cliente;
   - equipamento;
-  - impressora compatível;
+  - impressora;
+  - **tipo de serviço** (Formatação, Instalação do Windows, Configuração de roteador, Conserto, Montagem de computador);
   - descrição;
   - valor cobrado;
-  - status;
-  - data.
-- **Caixa** para lançar valores cobrados/recebidos com data e referência.
-- Relatórios rápidos com total de ordens, total cobrado, ordens concluídas e total recebido no caixa.
-- Dados salvos no navegador (LocalStorage) para uso prático do painel web.
+  - status e data.
+- Caixa para lançar valores recebidos.
+- Relatórios com total de ordens, clientes atendidos, total cobrado, concluídas e total em caixa.
 
 ## Segurança backend
 - Login com JWT (`/api/auth/login`).
@@ -27,9 +28,6 @@ Projeto backend + interface web para controle de manutenção de computadores em
 - Também funciona via IP da máquina, por exemplo: `http://192.168.x.x:7000`
 - Não precisa domínio para acessar localmente.
 
-## Correção do erro de deploy (mount no Nginx)
-Para evitar o erro `not a directory` no deploy (Portainer/Stacks), o serviço web usa **imagem custom do Nginx** com arquivos copiados no build, sem bind mount de arquivo de configuração.
-
 ## Estrutura
 - `docker-compose.yml`: API + PostgreSQL + gateway web HTTP (Nginx).
 - `Dockerfile`: imagem da API FastAPI.
@@ -37,11 +35,3 @@ Para evitar o erro `not a directory` no deploy (Portainer/Stacks), o serviço we
 - `nginx/http.conf`: estático + proxy HTTP para frontend/API.
 - `web/index.html`, `web/styles.css`, `web/app.js`: interface web interativa.
 - `app/`: código da API.
-
-## Endpoints principais da API (via `/api`)
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/people` e `GET /api/people`
-- `POST /api/clients` e `GET /api/clients`
-- `POST /api/service-orders` e `GET /api/service-orders`
-- `GET /api/health`

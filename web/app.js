@@ -1,8 +1,10 @@
 const state = {
   orders: JSON.parse(localStorage.getItem("erp_orders") || "[]"),
   cash: JSON.parse(localStorage.getItem("erp_cash") || "[]"),
-  creds: JSON.parse(localStorage.getItem("erp_creds") || "null"),
+  users: JSON.parse(localStorage.getItem("erp_users") || "[]"),
+  nextOrderId: Number(localStorage.getItem("erp_next_order_id") || "1"),
   logged: sessionStorage.getItem("erp_logged") === "1",
+  currentUser: sessionStorage.getItem("erp_current_user") || "",
 };
 
 const msg = document.getElementById("msg");
@@ -11,11 +13,13 @@ const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
 const ordersTable = document.getElementById("ordersTable");
 const cashTable = document.getElementById("cashTable");
+const usersTable = document.getElementById("usersTable");
 
 function saveState() {
   localStorage.setItem("erp_orders", JSON.stringify(state.orders));
   localStorage.setItem("erp_cash", JSON.stringify(state.cash));
-  localStorage.setItem("erp_creds", JSON.stringify(state.creds));
+  localStorage.setItem("erp_users", JSON.stringify(state.users));
+  localStorage.setItem("erp_next_order_id", String(state.nextOrderId));
 }
 
 function notify(text, ok = true) {
@@ -27,11 +31,19 @@ function hash(text) {
   return btoa(unescape(encodeURIComponent(text)));
 }
 
-function setLogged(logged) {
+function findUser(username) {
+  return state.users.find((u) => u.user.toLowerCase() === username.toLowerCase());
+}
+
+function setLogged(logged, user = "") {
   state.logged = logged;
+  state.currentUser = logged ? user : "";
   sessionStorage.setItem("erp_logged", logged ? "1" : "0");
-  setupSection.classList.toggle("hidden", !!state.creds);
-  loginSection.classList.toggle("hidden", !state.creds || logged);
+  sessionStorage.setItem("erp_current_user", state.currentUser);
+
+  const hasUsers = state.users.length > 0;
+  setupSection.classList.toggle("hidden", hasUsers);
+  loginSection.classList.toggle("hidden", !hasUsers || logged);
   appSection.classList.toggle("hidden", !logged);
 }
 
@@ -43,10 +55,10 @@ function renderOrders() {
   ordersTable.innerHTML = state.orders
     .map(
       (o) => `<tr>
+      <td>#${o.id}</td>
       <td>${o.data}</td>
       <td>${o.cliente}</td>
-      <td>${o.equipamento}</td>
-      <td>${o.descricao}</td>
+      <td>${o.tipoServico}</td>
       <td>${o.status}</td>
       <td>${money(o.valor)}</td>
     </tr>`
@@ -69,13 +81,21 @@ function renderCash() {
   document.getElementById("cashTotal").textContent = money(totalCaixa);
 }
 
+function renderUsers() {
+  usersTable.innerHTML = state.users
+    .map((u) => `<tr><td>${u.user}</td><td>${u.createdAt}</td></tr>`)
+    .join("");
+}
+
 function renderReports() {
   const totalOrdens = state.orders.length;
   const totalOrdemValor = state.orders.reduce((sum, o) => sum + Number(o.valor), 0);
   const concluidas = state.orders.filter((o) => o.status === "concluida").length;
   const totalCaixa = state.cash.reduce((sum, c) => sum + Number(c.valor), 0);
+  const clientesAtendidos = new Set(state.orders.map((o) => o.cliente.trim().toLowerCase())).size;
 
   document.getElementById("rTotalOrdens").textContent = String(totalOrdens);
+  document.getElementById("rTotalClientes").textContent = String(clientesAtendidos);
   document.getElementById("rTotalValor").textContent = money(totalOrdemValor);
   document.getElementById("rConcluidas").textContent = String(concluidas);
   document.getElementById("rTotalCaixa").textContent = money(totalCaixa);
@@ -84,6 +104,7 @@ function renderReports() {
 function renderAll() {
   renderOrders();
   renderCash();
+  renderUsers();
   renderReports();
 }
 
@@ -96,22 +117,28 @@ document.getElementById("setupForm").addEventListener("submit", (e) => {
     notify("Usuário deve ter ao menos 3 caracteres.", false);
     return;
   }
+  if (findUser(user)) {
+    notify("Usuário já existe.", false);
+    return;
+  }
 
-  state.creds = { user, passHash: hash(pass) };
+  state.users.push({ user, passHash: hash(pass), createdAt: new Date().toLocaleString("pt-BR") });
   saveState();
   e.target.reset();
   setLogged(false);
-  notify("Acesso configurado. Faça login.");
+  renderUsers();
+  notify("Primeiro usuário criado. Faça login.");
 });
 
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const user = document.getElementById("loginUser").value.trim();
   const pass = document.getElementById("loginPass").value;
+  const found = findUser(user);
 
-  if (state.creds && user === state.creds.user && hash(pass) === state.creds.passHash) {
-    setLogged(true);
-    notify("Login efetuado com sucesso.");
+  if (found && hash(pass) === found.passHash) {
+    setLogged(true, found.user);
+    notify(`Login efetuado. Bem-vindo, ${found.user}.`);
   } else {
     notify("Usuário ou senha inválidos.", false);
   }
@@ -120,9 +147,11 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
 document.getElementById("orderForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const order = {
+    id: state.nextOrderId++,
     cliente: document.getElementById("cliente").value.trim(),
     equipamento: document.getElementById("equipamento").value.trim(),
     impressora: document.getElementById("impressora").value,
+    tipoServico: document.getElementById("tipoServico").value,
     descricao: document.getElementById("descricao").value.trim(),
     valor: document.getElementById("valor").value,
     status: document.getElementById("status").value,
@@ -133,7 +162,7 @@ document.getElementById("orderForm").addEventListener("submit", (e) => {
   saveState();
   renderAll();
   e.target.reset();
-  notify("Ordem salva com sucesso.");
+  notify(`Ordem #${order.id} salva com sucesso.`);
 });
 
 document.getElementById("cashForm").addEventListener("submit", (e) => {
@@ -151,17 +180,35 @@ document.getElementById("cashForm").addEventListener("submit", (e) => {
   notify("Lançamento realizado no caixa.");
 });
 
+document.getElementById("userForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const user = document.getElementById("novoUsuario").value.trim();
+  const pass = document.getElementById("novaSenhaUsuario").value;
+
+  if (findUser(user)) {
+    notify("Usuário já existe.", false);
+    return;
+  }
+
+  state.users.push({ user, passHash: hash(pass), createdAt: new Date().toLocaleString("pt-BR") });
+  saveState();
+  renderUsers();
+  e.target.reset();
+  notify("Novo usuário criado com sucesso.");
+});
+
 document.getElementById("passForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const atual = document.getElementById("senhaAtual").value;
   const nova = document.getElementById("senhaNova").value;
 
-  if (!state.creds || hash(atual) !== state.creds.passHash) {
+  const found = findUser(state.currentUser);
+  if (!found || hash(atual) !== found.passHash) {
     notify("Senha atual incorreta.", false);
     return;
   }
 
-  state.creds.passHash = hash(nova);
+  found.passHash = hash(nova);
   saveState();
   e.target.reset();
   notify("Senha alterada com sucesso.");
@@ -176,5 +223,5 @@ document.querySelectorAll(".tab[data-tab]").forEach((btn) => {
   });
 });
 
-setLogged(state.logged && !!state.creds);
+setLogged(state.logged && state.users.some((u) => u.user === state.currentUser), state.currentUser);
 renderAll();

@@ -15,21 +15,18 @@
         <span class="badge">Sistema ERP</span>
         <h1>Assistência Técnica de Computadores</h1>
         <p>
-          Controle atendimentos com login seguro, registro de ordens de serviço, valores cobrados
-          e relatórios rápidos.
+          Controle atendimentos com login seguro, ordem numerada, tipo de serviço, caixa e relatórios.
         </p>
       </header>
 
       <section class="login-card" id="setupSection">
         <h2>🛡️ Configuração inicial</h2>
-        <p class="helper">Defina seu usuário e senha no primeiro acesso.</p>
+        <p class="helper">Crie o primeiro usuário administrador no primeiro acesso.</p>
         <form id="setupForm" class="form-grid two-cols">
-          <label>
-            Usuário
+          <label>Usuário
             <input type="text" id="setupUser" placeholder="Seu usuário" required />
           </label>
-          <label>
-            Senha (mín. 8)
+          <label>Senha (mín. 8)
             <input type="password" id="setupPass" minlength="8" required />
           </label>
           <button type="submit" class="btn btn-primary">Salvar acesso</button>
@@ -39,12 +36,10 @@
       <section class="login-card hidden" id="loginSection">
         <h2>🔐 Login</h2>
         <form id="loginForm" class="form-grid two-cols">
-          <label>
-            Usuário
+          <label>Usuário
             <input type="text" id="loginUser" placeholder="Digite seu usuário" required />
           </label>
-          <label>
-            Senha
+          <label>Senha
             <input type="password" id="loginPass" placeholder="********" required />
           </label>
           <button type="submit" class="btn btn-primary">Entrar</button>
@@ -56,6 +51,7 @@
           <button class="tab active" data-tab="ordens">📋 Ordens</button>
           <button class="tab" data-tab="caixa">💵 Caixa</button>
           <button class="tab" data-tab="relatorios">📊 Relatórios</button>
+          <button class="tab" data-tab="usuarios">👥 Usuários</button>
           <button class="tab" data-tab="seguranca">🔑 Alterar Senha</button>
           <a class="tab link-tab" href="/docs">API Docs</a>
         </nav>
@@ -76,6 +72,16 @@
                 <option>HP Jato de Tinta</option>
                 <option>Epson Laser</option>
                 <option>Epson Jato de Tinta</option>
+              </select>
+            </label>
+            <label>Tipo de serviço
+              <select id="tipoServico" required>
+                <option value="">Selecione</option>
+                <option>Formatação</option>
+                <option>Instalação do Windows</option>
+                <option>Configuração de roteador</option>
+                <option>Conserto</option>
+                <option>Montagem de computador</option>
               </select>
             </label>
             <label class="full">Descrição do serviço
@@ -102,10 +108,10 @@
             <table>
               <thead>
                 <tr>
+                  <th>Nº OS</th>
                   <th>Data</th>
                   <th>Cliente</th>
-                  <th>Equipamento</th>
-                  <th>Serviço</th>
+                  <th>Tipo de Serviço</th>
                   <th>Status</th>
                   <th>Valor</th>
                 </tr>
@@ -148,27 +154,37 @@
         <div class="panel" id="tab-relatorios">
           <h3>Relatórios</h3>
           <div class="cards">
-            <article class="card">
-              <h4>Total de ordens</h4>
-              <p id="rTotalOrdens">0</p>
-            </article>
-            <article class="card">
-              <h4>Total cobrado (ordens)</h4>
-              <p id="rTotalValor">R$ 0,00</p>
-            </article>
-            <article class="card">
-              <h4>Ordens concluídas</h4>
-              <p id="rConcluidas">0</p>
-            </article>
-            <article class="card">
-              <h4>Caixa recebido</h4>
-              <p id="rTotalCaixa">R$ 0,00</p>
-            </article>
+            <article class="card"><h4>Total de ordens</h4><p id="rTotalOrdens">0</p></article>
+            <article class="card"><h4>Clientes atendidos</h4><p id="rTotalClientes">0</p></article>
+            <article class="card"><h4>Total cobrado (ordens)</h4><p id="rTotalValor">R$ 0,00</p></article>
+            <article class="card"><h4>Ordens concluídas</h4><p id="rConcluidas">0</p></article>
+            <article class="card"><h4>Caixa recebido</h4><p id="rTotalCaixa">R$ 0,00</p></article>
+          </div>
+        </div>
+
+        <div class="panel" id="tab-usuarios">
+          <h3>Gerenciar usuários</h3>
+          <form id="userForm" class="form-grid two-cols">
+            <label>Novo usuário
+              <input id="novoUsuario" type="text" minlength="3" required />
+            </label>
+            <label>Senha do novo usuário
+              <input id="novaSenhaUsuario" type="password" minlength="8" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Criar usuário</button>
+          </form>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Usuário</th><th>Criado em</th></tr>
+              </thead>
+              <tbody id="usersTable"></tbody>
+            </table>
           </div>
         </div>
 
         <div class="panel" id="tab-seguranca">
-          <h3>Alterar senha</h3>
+          <h3>Alterar senha do usuário logado</h3>
           <form id="passForm" class="form-grid two-cols">
             <label>Senha atual
               <input id="senhaAtual" type="password" required />
