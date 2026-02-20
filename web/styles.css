@@ -148,3 +148,5 @@ footer { margin-top: 0.8rem; color: #8eb4e9; }
 
 .pdf-link { color: #7ee7ff; font-weight: 700; text-decoration: none; }
 .pdf-link:hover { text-decoration: underline; }
+
+.mini-btn { margin-left: 0.4rem; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: #123266; color: var(--text); cursor: pointer; }

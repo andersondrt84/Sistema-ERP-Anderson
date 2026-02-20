@@ -40,7 +40,7 @@ function applyAdminVisibility() {
     if (!visible && adminPanel.classList.contains("active")) {
       adminPanel.classList.remove("active");
       const defaultTab = document.querySelector('.tab[data-tab="ordens"]');
-      const defaultPanel = document.getElementById('tab-ordens');
+      const defaultPanel = document.getElementById("tab-ordens");
       document.querySelectorAll('.tab[data-tab]').forEach((b) => b.classList.remove('active'));
       document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
       if (defaultTab) defaultTab.classList.add('active');
@@ -71,6 +71,83 @@ function monthLabel(dateStr) {
   return `${m}/${y}`;
 }
 
+function textSafe(v) {
+  return String(v || "").replace(/[()\\]/g, " ").replace(/[^\x20-\x7E]/g, " ");
+}
+
+function makePdfBlob(order) {
+  const lines = [
+    `ORDEM DE SERVICO #${order.id}`,
+    `Data: ${order.data}`,
+    `Cliente: ${order.cliente}`,
+    `Equipamento: ${order.equipamento}`,
+    `Tipo de servico: ${order.tipoServico}`,
+    `Impressora: ${order.impressora}`,
+    `Status: ${order.status}`,
+    `Valor: ${money(order.valor)}`,
+    `Descricao: ${order.descricao}`,
+  ].map(textSafe);
+
+  const content = [
+    "BT /F1 12 Tf 50 780 Td",
+    ...lines.map((l, i) => (i === 0 ? `(${l}) Tj` : `0 -18 Td (${l}) Tj`)),
+    "ET",
+  ].join("\n");
+
+  const objects = [];
+  const pushObj = (txt) => {
+    objects.push(txt);
+    return objects.length;
+  };
+
+  const obj1 = pushObj("<< /Type /Catalog /Pages 2 0 R >>");
+  const obj2 = pushObj("<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+  const obj3 = pushObj("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>");
+  const obj4 = pushObj(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+  const obj5 = pushObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  [obj1, obj2, obj3, obj4, obj5].forEach((id, idx) => {
+    offsets.push(pdf.length);
+    pdf += `${idx + 1} 0 obj\n${objects[idx]}\nendobj\n`;
+  });
+
+  const xrefPos = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += "0000000000 65535 f \n";
+  for (let i = 1; i <= objects.length; i += 1) {
+    pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+  return new Blob([pdf], { type: "application/pdf" });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Falha ao converter PDF"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function printPdfDataUrl(pdfDataUrl) {
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.src = pdfDataUrl;
+  document.body.appendChild(iframe);
+  iframe.onload = () => {
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+  };
+}
+
 function renderOrders() {
   ordersTable.innerHTML = state.orders
     .map(
@@ -81,7 +158,9 @@ function renderOrders() {
       <td>${o.tipoServico}</td>
       <td>${o.status}</td>
       <td>${money(o.valor)}</td>
-      <td>${o.pdfDataUrl ? `<a class="pdf-link" href="${o.pdfDataUrl}" target="_blank" rel="noopener">Abrir PDF</a>` : "-"}</td>
+      <td>
+        ${o.pdfDataUrl ? `<a class="pdf-link" href="${o.pdfDataUrl}" download="OS-${o.id}.pdf">Salvar PDF</a> <button class="mini-btn" data-print-id="${o.id}">Imprimir</button>` : "-"}
+      </td>
     </tr>`
     )
     .join("");
@@ -188,17 +267,8 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
 document.getElementById("orderForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const pdfFile = document.getElementById("descricaoPdf").files[0];
 
   try {
-    const pdfDataUrl = await new Promise((resolve, reject) => {
-      if (!pdfFile) return resolve(null);
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(new Error("Falha ao ler PDF"));
-      reader.readAsDataURL(pdfFile);
-    });
-
     const order = {
       id: state.nextOrderId++,
       cliente: document.getElementById("cliente").value.trim(),
@@ -209,17 +279,29 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
       valor: document.getElementById("valor").value,
       status: document.getElementById("status").value,
       data: document.getElementById("data").value,
-      pdfDataUrl,
+      pdfDataUrl: null,
     };
+
+    const pdfBlob = makePdfBlob(order);
+    order.pdfDataUrl = await blobToDataUrl(pdfBlob);
 
     state.orders.unshift(order);
     saveLocalData();
     renderAll();
     e.target.reset();
-    notify(`Ordem #${order.id} salva com sucesso.`);
+    notify(`Ordem #${order.id} salva e documento PDF gerado.`);
   } catch {
-    notify("Não foi possível anexar o PDF da descrição.", false);
+    notify("Não foi possível gerar o PDF da ordem de serviço.", false);
   }
+});
+
+ordersTable.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-print-id]");
+  if (!btn) return;
+  const id = Number(btn.dataset.printId);
+  const order = state.orders.find((o) => o.id === id);
+  if (!order || !order.pdfDataUrl) return;
+  printPdfDataUrl(order.pdfDataUrl);
 });
 
 document.getElementById("cashForm").addEventListener("submit", (e) => {

@@ -12,7 +12,8 @@ Projeto backend + interface web para controle de manutenção de computadores em
   - impressora;
   - **tipo de serviço** (Formatação, Instalação do Windows, Configuração de roteador, Conserto, Montagem de computador);
   - descrição;
-  - campo para anexar PDF da descrição do serviço;
+  - geração automática do documento da OS em PDF ao salvar;
+  - opção de imprimir em impressora do sistema e salvar PDF;
   - valor cobrado;
   - status (aberto, aguardando cliente, concluido) e data.
 - Caixa para lançar valores recebidos.
