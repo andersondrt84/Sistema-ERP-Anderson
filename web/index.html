@@ -15,30 +15,126 @@
         <span class="badge">Sistema ERP</span>
         <h1>Assistência Técnica de Computadores</h1>
         <p>
-          Controle seus atendimentos com agilidade: clientes, pessoas, ordens de serviço,
-          valores cobrados e compatibilidade de impressoras HP/Epson (laser e jato de tinta).
+          Controle atendimentos com login, registro de ordens de serviço, valores cobrados e
+          relatórios rápidos.
         </p>
-        <a class="cta" href="/docs">Acessar API Docs</a>
       </header>
 
-      <section class="cards">
-        <article class="card">
-          <h2>👤 Clientes e Pessoas</h2>
-          <p>Cadastre quem você atende e mantenha os dados organizados.</p>
-        </article>
-        <article class="card">
-          <h2>🧾 Ordens de Serviço</h2>
-          <p>Registre serviços, status e valores cobrados com praticidade.</p>
-        </article>
-        <article class="card">
-          <h2>🖨️ Impressoras Compatíveis</h2>
-          <p>Suporte para HP e Epson, nos modos laser e jato de tinta.</p>
-        </article>
+      <section class="login-card" id="loginSection">
+        <h2>🔐 Login</h2>
+        <p class="helper">Usuário padrão: <strong>anderson</strong> | Senha padrão: <strong>12345678</strong></p>
+        <form id="loginForm" class="form-grid two-cols">
+          <label>
+            Usuário
+            <input type="text" id="loginUser" placeholder="anderson" required />
+          </label>
+          <label>
+            Senha
+            <input type="password" id="loginPass" placeholder="********" required />
+          </label>
+          <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
       </section>
 
-      <footer>
-        <small>ERP Assistência Técnica • Acesso Web na porta 7000</small>
-      </footer>
+      <section id="appSection" class="hidden">
+        <nav class="tabs">
+          <button class="tab active" data-tab="ordens">📋 Ordens</button>
+          <button class="tab" data-tab="relatorios">📊 Relatórios</button>
+          <button class="tab" data-tab="seguranca">🔑 Alterar Senha</button>
+          <a class="tab link-tab" href="/docs">API Docs</a>
+        </nav>
+
+        <div class="panel active" id="tab-ordens">
+          <h3>Registrar Ordem de Serviço</h3>
+          <form id="orderForm" class="form-grid three-cols">
+            <label>Cliente
+              <input id="cliente" required placeholder="Nome do cliente" />
+            </label>
+            <label>Equipamento
+              <input id="equipamento" required placeholder="Ex: Notebook Dell" />
+            </label>
+            <label>Impressora
+              <select id="impressora" required>
+                <option value="">Selecione</option>
+                <option>HP Laser</option>
+                <option>HP Jato de Tinta</option>
+                <option>Epson Laser</option>
+                <option>Epson Jato de Tinta</option>
+              </select>
+            </label>
+            <label class="full">Descrição do serviço
+              <textarea id="descricao" rows="3" placeholder="Descreva o serviço executado" required></textarea>
+            </label>
+            <label>Valor cobrado (R$)
+              <input id="valor" type="number" min="0" step="0.01" required />
+            </label>
+            <label>Status
+              <select id="status" required>
+                <option>aberta</option>
+                <option>em_andamento</option>
+                <option>concluida</option>
+                <option>cancelada</option>
+              </select>
+            </label>
+            <label>Data
+              <input id="data" type="date" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Salvar ordem</button>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Cliente</th>
+                  <th>Equipamento</th>
+                  <th>Serviço</th>
+                  <th>Status</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" id="tab-relatorios">
+          <h3>Relatórios</h3>
+          <div class="cards">
+            <article class="card">
+              <h4>Total de ordens</h4>
+              <p id="rTotalOrdens">0</p>
+            </article>
+            <article class="card">
+              <h4>Total cobrado</h4>
+              <p id="rTotalValor">R$ 0,00</p>
+            </article>
+            <article class="card">
+              <h4>Ordens concluídas</h4>
+              <p id="rConcluidas">0</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="panel" id="tab-seguranca">
+          <h3>Alterar senha</h3>
+          <form id="passForm" class="form-grid two-cols">
+            <label>Senha atual
+              <input id="senhaAtual" type="password" required />
+            </label>
+            <label>Nova senha
+              <input id="senhaNova" type="password" minlength="8" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Atualizar senha</button>
+          </form>
+        </div>
+      </section>
+
+      <p class="message" id="msg"></p>
+      <footer><small>ERP Assistência Técnica • Acesso Web na porta 7000</small></footer>
     </main>
+
+    <script src="app.js"></script>
   </body>
 </html>
