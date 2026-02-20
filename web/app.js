@@ -1,25 +1,25 @@
+const FIXED_USER = "anderson";
+
 const state = {
   orders: JSON.parse(localStorage.getItem("erp_orders") || "[]"),
   cash: JSON.parse(localStorage.getItem("erp_cash") || "[]"),
-  users: JSON.parse(localStorage.getItem("erp_users") || "[]"),
   nextOrderId: Number(localStorage.getItem("erp_next_order_id") || "1"),
   logged: sessionStorage.getItem("erp_logged") === "1",
   currentUser: sessionStorage.getItem("erp_current_user") || "",
+  andersonPassHash: localStorage.getItem("erp_anderson_pass_hash") || "",
 };
 
 const msg = document.getElementById("msg");
-const setupSection = document.getElementById("setupSection");
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
 const ordersTable = document.getElementById("ordersTable");
 const cashTable = document.getElementById("cashTable");
-const usersTable = document.getElementById("usersTable");
 
 function saveState() {
   localStorage.setItem("erp_orders", JSON.stringify(state.orders));
   localStorage.setItem("erp_cash", JSON.stringify(state.cash));
-  localStorage.setItem("erp_users", JSON.stringify(state.users));
   localStorage.setItem("erp_next_order_id", String(state.nextOrderId));
+  localStorage.setItem("erp_anderson_pass_hash", state.andersonPassHash);
 }
 
 function notify(text, ok = true) {
@@ -44,19 +44,12 @@ function fileToDataUrl(file) {
   });
 }
 
-function findUser(username) {
-  return state.users.find((u) => u.user.toLowerCase() === username.toLowerCase());
-}
-
 function setLogged(logged, user = "") {
   state.logged = logged;
   state.currentUser = logged ? user : "";
   sessionStorage.setItem("erp_logged", logged ? "1" : "0");
   sessionStorage.setItem("erp_current_user", state.currentUser);
-
-  const hasUsers = state.users.length > 0;
-  setupSection.classList.toggle("hidden", hasUsers);
-  loginSection.classList.toggle("hidden", !hasUsers || logged);
+  loginSection.classList.toggle("hidden", logged);
   appSection.classList.toggle("hidden", !logged);
 }
 
@@ -99,12 +92,6 @@ function renderCash() {
 
   const totalCaixa = state.cash.reduce((sum, c) => sum + Number(c.valor), 0);
   document.getElementById("cashTotal").textContent = money(totalCaixa);
-}
-
-function renderUsers() {
-  usersTable.innerHTML = state.users
-    .map((u) => `<tr><td>${u.user}</td><td>${u.createdAt}</td></tr>`)
-    .join("");
 }
 
 function renderReports() {
@@ -158,43 +145,30 @@ function renderReports() {
 function renderAll() {
   renderOrders();
   renderCash();
-  renderUsers();
   renderReports();
 }
 
-document.getElementById("setupForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const user = document.getElementById("setupUser").value.trim();
-  const pass = document.getElementById("setupPass").value;
-
-  if (user.length < 3) {
-    notify("Usuário deve ter ao menos 3 caracteres.", false);
-    return;
-  }
-  if (findUser(user)) {
-    notify("Usuário já existe.", false);
-    return;
-  }
-
-  state.users.push({ user, passHash: hash(pass), createdAt: new Date().toLocaleString("pt-BR") });
+// senha inicial padrão para anderson (se ainda não tiver configurada)
+if (!state.andersonPassHash) {
+  state.andersonPassHash = hash("12345678");
   saveState();
-  e.target.reset();
-  setLogged(false);
-  renderUsers();
-  notify("Primeiro usuário criado. Faça login.");
-});
+}
 
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
-  const user = document.getElementById("loginUser").value.trim();
+  const user = document.getElementById("loginUser").value.trim().toLowerCase();
   const pass = document.getElementById("loginPass").value;
-  const found = findUser(user);
 
-  if (found && hash(pass) === found.passHash) {
-    setLogged(true, found.user);
-    notify(`Login efetuado. Bem-vindo, ${found.user}.`);
+  if (user !== FIXED_USER) {
+    notify("Acesso permitido apenas para o usuário anderson.", false);
+    return;
+  }
+
+  if (hash(pass) === state.andersonPassHash) {
+    setLogged(true, FIXED_USER);
+    notify("Login efetuado com sucesso.");
   } else {
-    notify("Usuário ou senha inválidos.", false);
+    notify("Senha inválida.", false);
   }
 });
 
@@ -242,35 +216,22 @@ document.getElementById("cashForm").addEventListener("submit", (e) => {
   notify("Lançamento realizado no caixa.");
 });
 
-document.getElementById("userForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const user = document.getElementById("novoUsuario").value.trim();
-  const pass = document.getElementById("novaSenhaUsuario").value;
-
-  if (findUser(user)) {
-    notify("Usuário já existe.", false);
-    return;
-  }
-
-  state.users.push({ user, passHash: hash(pass), createdAt: new Date().toLocaleString("pt-BR") });
-  saveState();
-  renderUsers();
-  e.target.reset();
-  notify("Novo usuário criado com sucesso.");
-});
-
 document.getElementById("passForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const atual = document.getElementById("senhaAtual").value;
   const nova = document.getElementById("senhaNova").value;
 
-  const found = findUser(state.currentUser);
-  if (!found || hash(atual) !== found.passHash) {
+  if (state.currentUser !== FIXED_USER) {
+    notify("Somente o usuário anderson pode alterar a senha.", false);
+    return;
+  }
+
+  if (hash(atual) !== state.andersonPassHash) {
     notify("Senha atual incorreta.", false);
     return;
   }
 
-  found.passHash = hash(nova);
+  state.andersonPassHash = hash(nova);
   saveState();
   e.target.reset();
   notify("Senha alterada com sucesso.");
@@ -285,5 +246,5 @@ document.querySelectorAll(".tab[data-tab]").forEach((btn) => {
   });
 });
 
-setLogged(state.logged && state.users.some((u) => u.user === state.currentUser), state.currentUser);
+setLogged(state.logged && state.currentUser === FIXED_USER, state.currentUser);
 renderAll();

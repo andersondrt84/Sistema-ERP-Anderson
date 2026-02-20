@@ -19,25 +19,12 @@
         </p>
       </header>
 
-      <section class="login-card" id="setupSection">
-        <h2>🛡️ Configuração inicial</h2>
-        <p class="helper">Crie o primeiro usuário administrador no primeiro acesso.</p>
-        <form id="setupForm" class="form-grid two-cols">
-          <label>Usuário
-            <input type="text" id="setupUser" placeholder="Seu usuário" required />
-          </label>
-          <label>Senha (mín. 8)
-            <input type="password" id="setupPass" minlength="8" required />
-          </label>
-          <button type="submit" class="btn btn-primary">Salvar acesso</button>
-        </form>
-      </section>
-
-      <section class="login-card hidden" id="loginSection">
+      <section class="login-card" id="loginSection">
         <h2>🔐 Login</h2>
+        <p class="helper">Acesso administrativo pelo usuário fixo <strong>anderson</strong>.</p>
         <form id="loginForm" class="form-grid two-cols">
           <label>Usuário
-            <input type="text" id="loginUser" placeholder="Digite seu usuário" required />
+            <input type="text" id="loginUser" placeholder="anderson" required />
           </label>
           <label>Senha
             <input type="password" id="loginPass" placeholder="********" required />
@@ -51,7 +38,6 @@
           <button class="tab active" data-tab="ordens">📋 Ordens</button>
           <button class="tab" data-tab="caixa">💵 Caixa</button>
           <button class="tab" data-tab="relatorios">📊 Relatórios</button>
-          <button class="tab" data-tab="usuarios">👥 Usuários</button>
           <button class="tab" data-tab="seguranca">🔑 Alterar Senha</button>
           <a class="tab link-tab" href="/docs">API Docs</a>
         </nav>
@@ -193,29 +179,8 @@
           </div>
         </div>
 
-        <div class="panel" id="tab-usuarios">
-          <h3>Gerenciar usuários</h3>
-          <form id="userForm" class="form-grid two-cols">
-            <label>Novo usuário
-              <input id="novoUsuario" type="text" minlength="3" required />
-            </label>
-            <label>Senha do novo usuário
-              <input id="novaSenhaUsuario" type="password" minlength="8" required />
-            </label>
-            <button type="submit" class="btn btn-primary">Criar usuário</button>
-          </form>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Usuário</th><th>Criado em</th></tr>
-              </thead>
-              <tbody id="usersTable"></tbody>
-            </table>
-          </div>
-        </div>
-
         <div class="panel" id="tab-seguranca">
-          <h3>Alterar senha do usuário logado</h3>
+          <h3>Alterar senha do usuário anderson</h3>
           <form id="passForm" class="form-grid two-cols">
             <label>Senha atual
               <input id="senhaAtual" type="password" required />
