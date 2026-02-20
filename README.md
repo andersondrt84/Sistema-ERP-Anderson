@@ -18,21 +18,20 @@ Projeto backend + interface web para controle de trabalho extra de manutenção 
 - Rotas de cadastro e listagem protegidas por Bearer Token.
 - Senhas com hash (`bcrypt`).
 
-## Acesso Web (HTTP/HTTPS)
+## Acesso Web HTTP (sem domínio)
 - **HTTP principal na porta 7000**: `http://localhost:7000`
-- HTTPS opcional: `https://localhost:7443` (serviço `web-https`, profile `https`).
+- Também funciona via IP da máquina, por exemplo: `http://192.168.x.x:7000`
+- Não precisa domínio para acessar localmente.
 - A interface web tem layout moderno com cores vibrantes em gradiente.
 - A API fica atrás do Nginx em `/api/*`.
 - Documentação da API: `/docs`.
 
 ## Estrutura
-- `docker-compose.yml`: API + PostgreSQL + gateway web (Nginx HTTP/HTTPS).
+- `docker-compose.yml`: API + PostgreSQL + gateway web HTTP (Nginx).
 - `Dockerfile`: imagem da API FastAPI.
 - `.env.example`: variáveis de ambiente base.
 - `nginx/http.conf`: estático + proxy HTTP para frontend/API.
-- `nginx/https.conf`: estático + proxy HTTPS para frontend/API.
 - `web/index.html` e `web/styles.css`: layout visual do ERP.
-- `certs/`: pasta para certificados TLS (`fullchain.pem` e `privkey.pem`).
 - `app/`: código da aplicação.
 
 ## Endpoints principais da API (via `/api`)
@@ -42,11 +41,6 @@ Projeto backend + interface web para controle de trabalho extra de manutenção 
 - `POST /api/clients` e `GET /api/clients`
 - `POST /api/service-orders` e `GET /api/service-orders`
 - `GET /api/health`
-
-## HTTPS (certificados)
-Para o serviço `web-https`, coloque os arquivos abaixo em `certs/`:
-- `certs/fullchain.pem`
-- `certs/privkey.pem`
 
 ## Observação
 Conforme solicitado, os códigos foram apenas adicionados/atualizados no repositório.
