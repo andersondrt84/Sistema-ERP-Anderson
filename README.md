@@ -17,7 +17,7 @@ Projeto backend + interface web para controle de manutenção de computadores em
   - valor cobrado;
   - status (aberto, aguardando cliente, concluido) e data.
 - Caixa para lançar valores recebidos.
-- Relatórios com total de ordens, clientes atendidos, total cobrado, concluídas e total em caixa.
+- Relatórios com total de ordens, clientes atendidos, total cobrado, concluídas, total em caixa, resumo por mês e resumo por tipo de serviço.
 
 ## Segurança backend
 - Login com JWT (`/api/auth/login`).

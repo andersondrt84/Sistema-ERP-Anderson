@@ -64,6 +64,12 @@ function money(v) {
   return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function monthLabel(dateStr) {
+  if (!dateStr) return "Sem data";
+  const [y, m] = dateStr.split("-");
+  return `${m}/${y}`;
+}
+
 function renderOrders() {
   ordersTable.innerHTML = state.orders
     .map(
@@ -104,7 +110,7 @@ function renderUsers() {
 function renderReports() {
   const totalOrdens = state.orders.length;
   const totalOrdemValor = state.orders.reduce((sum, o) => sum + Number(o.valor), 0);
-  const concluidas = state.orders.filter((o) => ["concluido","concluida"].includes(o.status)).length;
+  const concluidas = state.orders.filter((o) => ["concluido", "concluida"].includes(o.status)).length;
   const totalCaixa = state.cash.reduce((sum, c) => sum + Number(c.valor), 0);
   const clientesAtendidos = new Set(state.orders.map((o) => o.cliente.trim().toLowerCase())).size;
 
@@ -113,6 +119,40 @@ function renderReports() {
   document.getElementById("rTotalValor").textContent = money(totalOrdemValor);
   document.getElementById("rConcluidas").textContent = String(concluidas);
   document.getElementById("rTotalCaixa").textContent = money(totalCaixa);
+
+  const monthMap = new Map();
+  for (const o of state.orders) {
+    const key = monthLabel(o.data);
+    const prev = monthMap.get(key) || { count: 0, total: 0 };
+    prev.count += 1;
+    prev.total += Number(o.valor || 0);
+    monthMap.set(key, prev);
+  }
+
+  const monthRows = [...monthMap.entries()]
+    .sort((a, b) => {
+      const [ma, ya] = a[0].split("/").map(Number);
+      const [mb, yb] = b[0].split("/").map(Number);
+      return yb - ya || mb - ma;
+    })
+    .map(([month, data]) => `<tr><td>${month}</td><td>${data.count}</td><td>${money(data.total)}</td></tr>`)
+    .join("");
+  document.getElementById("reportByMonth").innerHTML = monthRows || '<tr><td colspan="3">Sem dados</td></tr>';
+
+  const typeMap = new Map();
+  for (const o of state.orders) {
+    const key = o.tipoServico || "Não informado";
+    const prev = typeMap.get(key) || { count: 0, total: 0 };
+    prev.count += 1;
+    prev.total += Number(o.valor || 0);
+    typeMap.set(key, prev);
+  }
+
+  const typeRows = [...typeMap.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([type, data]) => `<tr><td>${type}</td><td>${data.count}</td><td>${money(data.total)}</td></tr>`)
+    .join("");
+  document.getElementById("reportByType").innerHTML = typeRows || '<tr><td colspan="3">Sem dados</td></tr>';
 }
 
 function renderAll() {
