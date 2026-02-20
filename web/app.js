@@ -1,22 +1,21 @@
-const DEFAULT_USER = "anderson";
-const DEFAULT_PASS = "12345678";
-
 const state = {
   orders: JSON.parse(localStorage.getItem("erp_orders") || "[]"),
-  user: localStorage.getItem("erp_user") || DEFAULT_USER,
-  pass: localStorage.getItem("erp_pass") || DEFAULT_PASS,
+  cash: JSON.parse(localStorage.getItem("erp_cash") || "[]"),
+  creds: JSON.parse(localStorage.getItem("erp_creds") || "null"),
   logged: sessionStorage.getItem("erp_logged") === "1",
 };
 
 const msg = document.getElementById("msg");
+const setupSection = document.getElementById("setupSection");
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
 const ordersTable = document.getElementById("ordersTable");
+const cashTable = document.getElementById("cashTable");
 
 function saveState() {
   localStorage.setItem("erp_orders", JSON.stringify(state.orders));
-  localStorage.setItem("erp_user", state.user);
-  localStorage.setItem("erp_pass", state.pass);
+  localStorage.setItem("erp_cash", JSON.stringify(state.cash));
+  localStorage.setItem("erp_creds", JSON.stringify(state.creds));
 }
 
 function notify(text, ok = true) {
@@ -24,10 +23,15 @@ function notify(text, ok = true) {
   msg.style.color = ok ? "#86efac" : "#fca5a5";
 }
 
+function hash(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
+
 function setLogged(logged) {
   state.logged = logged;
   sessionStorage.setItem("erp_logged", logged ? "1" : "0");
-  loginSection.classList.toggle("hidden", logged);
+  setupSection.classList.toggle("hidden", !!state.creds);
+  loginSection.classList.toggle("hidden", !state.creds || logged);
   appSection.classList.toggle("hidden", !logged);
 }
 
@@ -48,21 +52,64 @@ function renderOrders() {
     </tr>`
     )
     .join("");
-
-  document.getElementById("rTotalOrdens").textContent = String(state.orders.length);
-  document.getElementById("rTotalValor").textContent = money(
-    state.orders.reduce((sum, o) => sum + Number(o.valor), 0)
-  );
-  document.getElementById("rConcluidas").textContent = String(
-    state.orders.filter((o) => o.status === "concluida").length
-  );
 }
+
+function renderCash() {
+  cashTable.innerHTML = state.cash
+    .map(
+      (c) => `<tr>
+      <td>${c.data}</td>
+      <td>${c.ref}</td>
+      <td>${money(c.valor)}</td>
+    </tr>`
+    )
+    .join("");
+
+  const totalCaixa = state.cash.reduce((sum, c) => sum + Number(c.valor), 0);
+  document.getElementById("cashTotal").textContent = money(totalCaixa);
+}
+
+function renderReports() {
+  const totalOrdens = state.orders.length;
+  const totalOrdemValor = state.orders.reduce((sum, o) => sum + Number(o.valor), 0);
+  const concluidas = state.orders.filter((o) => o.status === "concluida").length;
+  const totalCaixa = state.cash.reduce((sum, c) => sum + Number(c.valor), 0);
+
+  document.getElementById("rTotalOrdens").textContent = String(totalOrdens);
+  document.getElementById("rTotalValor").textContent = money(totalOrdemValor);
+  document.getElementById("rConcluidas").textContent = String(concluidas);
+  document.getElementById("rTotalCaixa").textContent = money(totalCaixa);
+}
+
+function renderAll() {
+  renderOrders();
+  renderCash();
+  renderReports();
+}
+
+document.getElementById("setupForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const user = document.getElementById("setupUser").value.trim();
+  const pass = document.getElementById("setupPass").value;
+
+  if (user.length < 3) {
+    notify("Usuário deve ter ao menos 3 caracteres.", false);
+    return;
+  }
+
+  state.creds = { user, passHash: hash(pass) };
+  saveState();
+  e.target.reset();
+  setLogged(false);
+  notify("Acesso configurado. Faça login.");
+});
 
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
-  const u = document.getElementById("loginUser").value.trim();
-  const p = document.getElementById("loginPass").value;
-  if (u === state.user && p === state.pass) {
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+
+  if (state.creds && user === state.creds.user && hash(pass) === state.creds.passHash) {
     setLogged(true);
     notify("Login efetuado com sucesso.");
   } else {
@@ -84,9 +131,24 @@ document.getElementById("orderForm").addEventListener("submit", (e) => {
 
   state.orders.unshift(order);
   saveState();
-  renderOrders();
+  renderAll();
   e.target.reset();
   notify("Ordem salva com sucesso.");
+});
+
+document.getElementById("cashForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const cash = {
+    data: document.getElementById("cashData").value,
+    ref: document.getElementById("cashRef").value.trim(),
+    valor: document.getElementById("cashValor").value,
+  };
+
+  state.cash.unshift(cash);
+  saveState();
+  renderAll();
+  e.target.reset();
+  notify("Lançamento realizado no caixa.");
 });
 
 document.getElementById("passForm").addEventListener("submit", (e) => {
@@ -94,15 +156,12 @@ document.getElementById("passForm").addEventListener("submit", (e) => {
   const atual = document.getElementById("senhaAtual").value;
   const nova = document.getElementById("senhaNova").value;
 
-  if (atual !== state.pass) {
+  if (!state.creds || hash(atual) !== state.creds.passHash) {
     notify("Senha atual incorreta.", false);
     return;
   }
-  if (nova.length < 8) {
-    notify("A nova senha deve ter no mínimo 8 caracteres.", false);
-    return;
-  }
-  state.pass = nova;
+
+  state.creds.passHash = hash(nova);
   saveState();
   e.target.reset();
   notify("Senha alterada com sucesso.");
@@ -117,5 +176,5 @@ document.querySelectorAll(".tab[data-tab]").forEach((btn) => {
   });
 });
 
-setLogged(state.logged);
-renderOrders();
+setLogged(state.logged && !!state.creds);
+renderAll();

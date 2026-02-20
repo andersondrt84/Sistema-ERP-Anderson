@@ -143,3 +143,5 @@ th, td { border-bottom: 1px solid var(--border); padding: 0.55rem; text-align: l
 
 .message { min-height: 1.2rem; color: #86efac; font-weight: 600; }
 footer { margin-top: 0.8rem; color: #8eb4e9; }
+
+.cash-total { margin: 0.8rem 0 0.3rem; color: #9be7c4; }

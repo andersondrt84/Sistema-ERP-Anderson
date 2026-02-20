@@ -3,8 +3,8 @@
 Projeto backend + interface web para controle de manutenção de computadores em casa.
 
 ## Funcionalidades web
-- Login na interface com usuário padrão `anderson` e senha padrão `12345678`.
-- Opção de **alteração de senha** na própria interface.
+- Login na interface com **configuração inicial de usuário/senha** (sem credenciais padrão expostas na tela).
+- Senha armazenada no navegador em formato codificado e opção de **alteração de senha**.
 - Cadastro clicável de ordens de serviço com:
   - cliente;
   - equipamento;
@@ -13,7 +13,8 @@ Projeto backend + interface web para controle de manutenção de computadores em
   - valor cobrado;
   - status;
   - data.
-- Relatórios rápidos com total de ordens, total cobrado e ordens concluídas.
+- **Caixa** para lançar valores cobrados/recebidos com data e referência.
+- Relatórios rápidos com total de ordens, total cobrado, ordens concluídas e total recebido no caixa.
 - Dados salvos no navegador (LocalStorage) para uso prático do painel web.
 
 ## Segurança backend

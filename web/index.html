@@ -15,18 +15,33 @@
         <span class="badge">Sistema ERP</span>
         <h1>Assistência Técnica de Computadores</h1>
         <p>
-          Controle atendimentos com login, registro de ordens de serviço, valores cobrados e
-          relatórios rápidos.
+          Controle atendimentos com login seguro, registro de ordens de serviço, valores cobrados
+          e relatórios rápidos.
         </p>
       </header>
 
-      <section class="login-card" id="loginSection">
+      <section class="login-card" id="setupSection">
+        <h2>🛡️ Configuração inicial</h2>
+        <p class="helper">Defina seu usuário e senha no primeiro acesso.</p>
+        <form id="setupForm" class="form-grid two-cols">
+          <label>
+            Usuário
+            <input type="text" id="setupUser" placeholder="Seu usuário" required />
+          </label>
+          <label>
+            Senha (mín. 8)
+            <input type="password" id="setupPass" minlength="8" required />
+          </label>
+          <button type="submit" class="btn btn-primary">Salvar acesso</button>
+        </form>
+      </section>
+
+      <section class="login-card hidden" id="loginSection">
         <h2>🔐 Login</h2>
-        <p class="helper">Usuário padrão: <strong>anderson</strong> | Senha padrão: <strong>12345678</strong></p>
         <form id="loginForm" class="form-grid two-cols">
           <label>
             Usuário
-            <input type="text" id="loginUser" placeholder="anderson" required />
+            <input type="text" id="loginUser" placeholder="Digite seu usuário" required />
           </label>
           <label>
             Senha
@@ -39,6 +54,7 @@
       <section id="appSection" class="hidden">
         <nav class="tabs">
           <button class="tab active" data-tab="ordens">📋 Ordens</button>
+          <button class="tab" data-tab="caixa">💵 Caixa</button>
           <button class="tab" data-tab="relatorios">📊 Relatórios</button>
           <button class="tab" data-tab="seguranca">🔑 Alterar Senha</button>
           <a class="tab link-tab" href="/docs">API Docs</a>
@@ -99,6 +115,36 @@
           </div>
         </div>
 
+        <div class="panel" id="tab-caixa">
+          <h3>Caixa de valores cobrados</h3>
+          <form id="cashForm" class="form-grid three-cols">
+            <label>Data
+              <input id="cashData" type="date" required />
+            </label>
+            <label>Referência
+              <input id="cashRef" placeholder="Ex: Ordem #102" required />
+            </label>
+            <label>Valor recebido (R$)
+              <input id="cashValor" type="number" min="0" step="0.01" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Lançar no caixa</button>
+          </form>
+          <p class="cash-total">Total no caixa: <strong id="cashTotal">R$ 0,00</strong></p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Referência</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="cashTable"></tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="panel" id="tab-relatorios">
           <h3>Relatórios</h3>
           <div class="cards">
@@ -107,12 +153,16 @@
               <p id="rTotalOrdens">0</p>
             </article>
             <article class="card">
-              <h4>Total cobrado</h4>
+              <h4>Total cobrado (ordens)</h4>
               <p id="rTotalValor">R$ 0,00</p>
             </article>
             <article class="card">
               <h4>Ordens concluídas</h4>
               <p id="rConcluidas">0</p>
+            </article>
+            <article class="card">
+              <h4>Caixa recebido</h4>
+              <p id="rTotalCaixa">R$ 0,00</p>
             </article>
           </div>
         </div>
