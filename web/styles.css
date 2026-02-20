@@ -150,3 +150,6 @@ footer { margin-top: 0.8rem; color: #8eb4e9; }
 .pdf-link:hover { text-decoration: underline; }
 
 .mini-btn { margin-left: 0.4rem; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: #123266; color: var(--text); cursor: pointer; }
+
+.logout-tab { background: #3b1f2e; border-color: rgba(255,120,120,0.35); }
+.logout-tab:hover { background: #5a283f; }

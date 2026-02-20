@@ -61,6 +61,15 @@ function setLogged(logged, user = "", token = "") {
   applyAdminVisibility();
 }
 
+
+function logout() {
+  setLogged(false, "", "");
+  sessionStorage.removeItem("erp_logged");
+  sessionStorage.removeItem("erp_current_user");
+  sessionStorage.removeItem("erp_token");
+  notify("Sessão encerrada com sucesso.");
+}
+
 function money(v) {
   return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -327,6 +336,12 @@ document.getElementById("passForm").addEventListener("submit", (e) => {
   }
   notify("Ajuste permitido para anderson. (Fluxo de senha deve ser feito pela API).", true);
 });
+
+
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => logout());
+}
 
 document.querySelectorAll(".tab[data-tab]").forEach((btn) => {
   btn.addEventListener("click", () => {

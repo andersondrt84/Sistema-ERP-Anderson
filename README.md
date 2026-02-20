@@ -5,6 +5,7 @@ Projeto backend + interface web para controle de manutenção de computadores em
 ## Funcionalidades web
 - Login para qualquer usuário existente no banco de dados (via API `/api/auth/login`).
 - Ajustes do sistema reservados para o usuário `anderson` na interface.
+- Botão de logout para encerrar sessão com segurança.
 - Cadastro de ordens com:
   - número automático da OS;
   - cliente;
