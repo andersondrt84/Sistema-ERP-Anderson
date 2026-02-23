@@ -18,7 +18,7 @@ from app.schemas import (
 )
 from app.security import create_access_token, get_password_hash, verify_password
 
-app = FastAPI(title="ERP Assistência Técnica", version="1.0.0")
+app = FastAPI(title="AnderTech OS - Gestão de Assistência", version="1.0.0")
 Base.metadata.create_all(bind=engine)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

@@ -1,4 +1,4 @@
-# Sistema leve de assistência técnica (Docker + PostgreSQL)
+# AnderTech OS - Gestão de Assistência (Docker + PostgreSQL)
 
 Projeto backend + interface web para controle de manutenção de computadores em casa, com layout mais simples e claro, fundo em cinza médio e botões principais no topo.
 
