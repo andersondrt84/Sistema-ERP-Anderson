@@ -45,15 +45,22 @@ Projeto backend + interface web para controle de manutenção de computadores em
 
 ## Backup do banco no Google Drive (automatizado)
 
-### 1) Instalar e configurar `rclone`
-1. Instale o rclone na máquina host.
-2. Execute `rclone config`.
-3. Crie um remote chamado `gdrive` (ou outro nome) autenticando sua conta Google Drive.
-4. Teste: `rclone lsd gdrive:`
+### 1) Conectar Google Drive ao container (sem instalar rclone no host)
+O projeto inclui o serviço `rclone` no `docker-compose` (profile `backup`) e o script:
+
+```bash
+./scripts/connect_gdrive_in_container.sh
+```
+
+Esse comando abre o `rclone config` dentro de container e salva a configuração em `./rclone/rclone.conf`.
+Na configuração, crie um remote chamado `gdrive`.
+
+Teste rápido:
+```bash
+docker compose run --rm --profile backup -v "$(pwd)/rclone:/config/rclone" rclone lsd gdrive:
+```
 
 ### 2) Gerar backup e enviar para Drive
-O projeto já inclui o script `scripts/backup_postgres_to_gdrive.sh`.
-
 Exemplo de execução manual:
 ```bash
 ./scripts/backup_postgres_to_gdrive.sh
@@ -67,11 +74,16 @@ DB_USER=erp_user
 BACKUP_DIR=./backups
 RCLONE_REMOTE=gdrive
 RCLONE_PATH=ERP-Backups/postgres
+RCLONE_IN_CONTAINER=auto
 ```
 
-Exemplo com variáveis customizadas:
+- `RCLONE_IN_CONTAINER=auto`: usa rclone do host se existir; caso contrário usa container.
+- `RCLONE_IN_CONTAINER=1`: força uso do container.
+- `RCLONE_IN_CONTAINER=0`: força uso do host.
+
+Exemplo forçando container:
 ```bash
-RCLONE_REMOTE=meu_drive RCLONE_PATH=Empresa/ERP ./scripts/backup_postgres_to_gdrive.sh
+RCLONE_IN_CONTAINER=1 RCLONE_PATH=Empresa/ERP ./scripts/backup_postgres_to_gdrive.sh
 ```
 
 ### 3) Agendar backup automático no Linux (cron)
@@ -80,9 +92,9 @@ Editar crontab:
 crontab -e
 ```
 
-Backup diário às 02:30:
+Backup diário às 02:30 (forçando rclone no container):
 ```cron
-30 2 * * * cd /caminho/Sistema-ERP-Anderson && /bin/bash ./scripts/backup_postgres_to_gdrive.sh >> ./backups/backup.log 2>&1
+30 2 * * * cd /caminho/Sistema-ERP-Anderson && RCLONE_IN_CONTAINER=1 /bin/bash ./scripts/backup_postgres_to_gdrive.sh >> ./backups/backup.log 2>&1
 ```
 
 ### 4) (Opcional) Política de retenção local

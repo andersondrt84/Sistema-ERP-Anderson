@@ -34,5 +34,15 @@ services:
     ports:
       - "7000:80"
 
+
+  rclone:
+    image: rclone/rclone:latest
+    profiles: ["backup"]
+    volumes:
+      - ./rclone:/config/rclone
+      - ./backups:/backups
+    working_dir: /workspace
+    entrypoint: ["rclone"]
+
 volumes:
   postgres_data:
