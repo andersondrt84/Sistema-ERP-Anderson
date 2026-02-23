@@ -1,4 +1,6 @@
 const ADMIN_USER = "anderson";
+const MASTER_USER = "administrador";
+const MASTER_PASS = "12345678";
 
 const state = {
   orders: JSON.parse(localStorage.getItem("erp_orders") || "[]"),
@@ -27,7 +29,8 @@ function notify(text, ok = true) {
 }
 
 function isAdminUser() {
-  return (state.currentUser || "").toLowerCase().startsWith(ADMIN_USER);
+  const u = (state.currentUser || "").toLowerCase();
+  return u.startsWith(ADMIN_USER) || u === MASTER_USER;
 }
 
 function applyAdminVisibility() {
@@ -265,12 +268,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const user = document.getElementById("loginUser").value.trim();
   const pass = document.getElementById("loginPass").value;
 
+  // usuário master local
+  if (user.toLowerCase() === MASTER_USER && pass === MASTER_PASS) {
+    setLogged(true, MASTER_USER, "master-local-session");
+    notify("Login efetuado com sucesso.");
+    return;
+  }
+
   try {
     const result = await loginViaApi(user, pass);
     setLogged(true, user, result.access_token || "");
     notify(`Login efetuado com sucesso para ${user}.`);
   } catch {
-    notify("Usuário ou senha inválidos.", false);
+    notify("Senha incorreta. Tente novamente.", false);
   }
 });
 

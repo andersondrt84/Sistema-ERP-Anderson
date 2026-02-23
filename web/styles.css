@@ -157,3 +157,5 @@ footer { margin-top: 0.8rem; color: #67806e; }
 
 .logout-tab { background: #f7eaea; border-color: rgba(179, 123, 123, 0.35); }
 .logout-tab:hover { background: #efdede; }
+
+#loginSection { background: var(--bg); }
