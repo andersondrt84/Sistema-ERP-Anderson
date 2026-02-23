@@ -158,4 +158,42 @@ footer { margin-top: 0.8rem; color: #67806e; }
 .logout-tab { background: #f7eaea; border-color: rgba(179, 123, 123, 0.35); }
 .logout-tab:hover { background: #efdede; }
 
-#loginSection { background: var(--bg); }
+
+
+
+.login-split {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #ffffff;
+}
+
+.login-brand {
+  background: #eef2ee;
+  padding: 1.5rem;
+  display: grid;
+  align-content: center;
+  gap: 0.6rem;
+  border-right: 1px solid var(--border);
+}
+
+.brand-logo {
+  width: min(280px, 100%);
+  height: auto;
+}
+
+.login-form-wrap {
+  padding: 1.5rem;
+  display: grid;
+  align-content: center;
+  gap: 0.45rem;
+  background: #f7f9f7;
+}
+
+@media (max-width: 900px) {
+  .login-split { grid-template-columns: 1fr; }
+  .login-brand { border-right: 0; border-bottom: 1px solid var(--border); }
+}

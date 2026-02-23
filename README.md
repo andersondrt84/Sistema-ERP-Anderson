@@ -1,6 +1,6 @@
-# AnderTech OS - Gestão de Assistência (Docker + PostgreSQL)
+# Gestão TI - Assistência Técnica (Docker + PostgreSQL)
 
-Projeto backend + interface web para controle de manutenção de computadores em casa, com layout mais simples e claro, fundo em cinza médio e botões principais no topo.
+Projeto backend + interface web para controle de manutenção de computadores em casa, com layout mais simples e claro, fundo em cinza médio e login em duas colunas (marca e autenticação).
 
 ## Funcionalidades web
 - Login para qualquer usuário existente no banco de dados (via API `/api/auth/login`).
@@ -34,6 +34,13 @@ Projeto backend + interface web para controle de manutenção de computadores em
 - **HTTP principal na porta 7000**: `http://localhost:7000`
 - Também funciona via IP da máquina, por exemplo: `http://192.168.x.x:7000`
 - Não precisa domínio para acessar localmente.
+
+## Desenvolvimento local rápido (sem Docker)
+1. Crie e ative um ambiente virtual Python.
+2. Instale dependências com `pip install -r requirements.txt`.
+3. Suba a API com `uvicorn app.main:app --reload --port 8000`.
+4. Em outro terminal, sirva os arquivos estáticos com `python -m http.server 7000 -d web`.
+5. Acesse `http://localhost:7000`.
 
 ## Estrutura
 - `docker-compose.yml`: API + PostgreSQL + gateway web HTTP (Nginx).

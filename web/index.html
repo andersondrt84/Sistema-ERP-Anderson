@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AnderTech OS - Gestão de Assistência</title>
+    <title>Gestão TI - Assistência Técnica</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -12,25 +12,32 @@
 
     <main class="container">
       <header class="hero">
-        <span class="badge">AnderTech OS</span>
+        <span class="badge">Gestão TI</span>
         <h1>Gestão de Assistência Técnica</h1>
         <p>
           Controle atendimentos com login seguro, ordem numerada, tipo de serviço, caixa e relatórios.
         </p>
       </header>
 
-      <section class="login-card" id="loginSection">
-        <h2>🔐 Login</h2>
-        <p class="helper">Use o usuário e senha já cadastrados no banco de dados para entrar.</p>
-        <form id="loginForm" class="form-grid two-cols">
-          <label>Usuário
-            <input type="text" id="loginUser" placeholder="" required />
-          </label>
-          <label>Senha
-            <input type="password" id="loginPass" placeholder="" required />
-          </label>
-          <button type="submit" class="btn btn-primary">Entrar</button>
-        </form>
+      <section class="login-split" id="loginSection">
+        <div class="login-brand">
+          <img src="logo-gestao-ti.svg" alt="Logo Gestão TI" class="brand-logo" />
+          <h2>Gestão TI</h2>
+          <p>Sistema para ordens de serviço, caixa, relatórios e impressão de documentos.</p>
+        </div>
+        <div class="login-form-wrap">
+          <h2>🔐 Login</h2>
+          <p class="helper">Use seu usuário e senha cadastrados no banco de dados.</p>
+          <form id="loginForm" class="form-grid">
+            <label>Usuário
+              <input type="text" id="loginUser" placeholder="" required />
+            </label>
+            <label>Senha
+              <input type="password" id="loginPass" placeholder="" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+          </form>
+        </div>
       </section>
 
       <section id="appSection" class="hidden">
@@ -209,7 +216,7 @@
       </section>
 
       <p class="message" id="msg"></p>
-      <footer><small>AnderTech OS - Gestão de Assistência • Acesso Web na porta 7000</small></footer>
+      <footer><small>Gestão TI - Assistência Técnica • Acesso Web na porta 7000</small></footer>
     </main>
 
     <script src="app.js"></script>
