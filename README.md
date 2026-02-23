@@ -20,6 +20,10 @@ Projeto backend + interface web para controle de manutenção de computadores em
   - status (aberto, aguardando cliente, concluido) e data.
 - Caixa para lançar valores recebidos.
 - Relatórios com total de ordens, clientes atendidos, total cobrado, concluídas, total em caixa, resumo por mês e resumo por tipo de serviço.
+- Compatibilidade de linguagens de impressão no cadastro da OS:
+  - Epson: ESC/P, ESC/P-R, ESC/P2, ESC/POS;
+  - HP: PCL 5/5e/5c, PCL 6 (PCL XL), PostScript (PS), PCLm / PCLmS;
+  - Bematech: ESC/POS, ESC/Bematech, Protocolo Direto (Spooler/DLL).
 
 ## Segurança backend
 - Login com JWT (`/api/auth/login`).

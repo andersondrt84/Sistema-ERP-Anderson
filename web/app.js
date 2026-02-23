@@ -96,6 +96,7 @@ function makePdfBlob(order) {
     `Tipo de servico: ${order.tipoServico}`,
     `Impressora: ${order.impressora}`,
     `Status: ${order.status}`,
+    `Linguagem: ${order.linguagemImpressao || "-"}`,
     `Valor: ${money(order.valor)}`,
     `Descricao: ${order.descricao}`,
   ].map(textSafe);
@@ -168,10 +169,11 @@ function renderOrders() {
       <td>${o.data}</td>
       <td>${o.cliente}</td>
       <td>${o.tipoServico}</td>
+      <td>${o.linguagemImpressao || "-"}</td>
       <td>${o.status}</td>
       <td>${money(o.valor)}</td>
       <td>
-        ${o.pdfDataUrl ? `<a class="pdf-link" href="${o.pdfDataUrl}" download="OS-${o.id}.pdf">Salvar PDF</a> <button class="mini-btn" data-print-id="${o.id}">Imprimir</button>` : "-"}
+        ${o.pdfDataUrl ? `<a class="pdf-link" href="${o.pdfDataUrl}" download="OS-${o.id}.pdf">Salvar PDF</a> <button class="mini-btn" data-print-id="${o.id}">Imprimir</button> <button class="mini-btn" data-preview-id="${o.id}">Pré-visualizar</button>` : "-"}
       </td>
     </tr>`
     )
@@ -293,6 +295,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
       cliente: document.getElementById("cliente").value.trim(),
       equipamento: document.getElementById("equipamento").value.trim(),
       impressora: document.getElementById("impressora").value,
+      linguagemImpressao: document.getElementById("linguagemImpressao").value,
       tipoServico: document.getElementById("tipoServico").value,
       descricao: document.getElementById("descricao").value.trim(),
       valor: document.getElementById("valor").value,
@@ -309,18 +312,29 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     renderAll();
     e.target.reset();
     notify(`Ordem #${order.id} salva e documento PDF gerado.`);
+    openPrintPreview(order);
   } catch {
     notify("Não foi possível gerar o PDF da ordem de serviço.", false);
   }
 });
 
 ordersTable.addEventListener("click", (e) => {
-  const btn = e.target.closest("button[data-print-id]");
-  if (!btn) return;
-  const id = Number(btn.dataset.printId);
-  const order = state.orders.find((o) => o.id === id);
-  if (!order || !order.pdfDataUrl) return;
-  printPdfDataUrl(order.pdfDataUrl);
+  const printBtn = e.target.closest("button[data-print-id]");
+  if (printBtn) {
+    const id = Number(printBtn.dataset.printId);
+    const order = state.orders.find((o) => o.id === id);
+    if (!order || !order.pdfDataUrl) return;
+    printPdfDataUrl(order.pdfDataUrl);
+    return;
+  }
+
+  const previewBtn = e.target.closest("button[data-preview-id]");
+  if (previewBtn) {
+    const id = Number(previewBtn.dataset.previewId);
+    const order = state.orders.find((o) => o.id === id);
+    if (!order || !order.pdfDataUrl) return;
+    openPrintPreview(order);
+  }
 });
 
 document.getElementById("cashForm").addEventListener("submit", (e) => {
