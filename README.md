@@ -42,6 +42,55 @@ Projeto backend + interface web para controle de manutenção de computadores em
 4. Em outro terminal, sirva os arquivos estáticos com `python -m http.server 7000 -d web`.
 5. Acesse `http://localhost:7000`.
 
+
+## Backup do banco no Google Drive (automatizado)
+
+### 1) Instalar e configurar `rclone`
+1. Instale o rclone na máquina host.
+2. Execute `rclone config`.
+3. Crie um remote chamado `gdrive` (ou outro nome) autenticando sua conta Google Drive.
+4. Teste: `rclone lsd gdrive:`
+
+### 2) Gerar backup e enviar para Drive
+O projeto já inclui o script `scripts/backup_postgres_to_gdrive.sh`.
+
+Exemplo de execução manual:
+```bash
+./scripts/backup_postgres_to_gdrive.sh
+```
+
+Variáveis opcionais:
+```bash
+DB_CONTAINER_SERVICE=db
+DB_NAME=erp_db
+DB_USER=erp_user
+BACKUP_DIR=./backups
+RCLONE_REMOTE=gdrive
+RCLONE_PATH=ERP-Backups/postgres
+```
+
+Exemplo com variáveis customizadas:
+```bash
+RCLONE_REMOTE=meu_drive RCLONE_PATH=Empresa/ERP ./scripts/backup_postgres_to_gdrive.sh
+```
+
+### 3) Agendar backup automático no Linux (cron)
+Editar crontab:
+```bash
+crontab -e
+```
+
+Backup diário às 02:30:
+```cron
+30 2 * * * cd /caminho/Sistema-ERP-Anderson && /bin/bash ./scripts/backup_postgres_to_gdrive.sh >> ./backups/backup.log 2>&1
+```
+
+### 4) (Opcional) Política de retenção local
+Para manter somente os 15 backups mais recentes localmente:
+```bash
+ls -1t ./backups/*.sql.gz | tail -n +16 | xargs -r rm -f
+```
+
 ## Estrutura
 - `docker-compose.yml`: API + PostgreSQL + gateway web HTTP (Nginx).
 - `Dockerfile`: imagem da API FastAPI.
