@@ -25,7 +25,7 @@ function saveLocalData() {
 
 function notify(text, ok = true) {
   msg.textContent = text;
-  msg.style.color = ok ? "#4d8ff5" : "#e66b6b";
+  msg.style.color = ok ? "#0d6efd" : "#e66b6b";
 }
 
 function isAdminUser() {
