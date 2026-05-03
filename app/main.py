@@ -23,6 +23,28 @@ Base.metadata.create_all(bind=engine)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+MASTER_USERNAME = "admin"
+MASTER_PASSWORD = "12345678"
+MASTER_EMAIL = "admin@local"
+
+
+def ensure_master_user(db: Session) -> None:
+    existing = db.query(User).filter(User.name == MASTER_USERNAME).first()
+    if existing:
+        return
+
+    user = User(
+        name=MASTER_USERNAME,
+        email=MASTER_EMAIL,
+        hashed_password=get_password_hash(MASTER_PASSWORD),
+    )
+    db.add(user)
+    db.commit()
+
+
+with Session(engine) as db:
+    ensure_master_user(db)
+
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(
@@ -52,8 +74,12 @@ def health_check():
 
 @app.post("/auth/register", response_model=UserOut)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == user_in.email).first()
-    if existing:
+    existing_name = db.query(User).filter(User.name == user_in.name).first()
+    if existing_name:
+        raise HTTPException(status_code=400, detail="Usuário já cadastrado")
+
+    existing_email = db.query(User).filter(User.email == user_in.email).first()
+    if existing_email:
         raise HTTPException(status_code=400, detail="E-mail já cadastrado")
 
     user = User(
@@ -69,7 +95,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/auth/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()
+    user = db.query(User).filter(User.name == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Credenciais inválidas")
 

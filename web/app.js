@@ -1,5 +1,5 @@
 const ADMIN_USER = "anderson";
-const MASTER_USER = "administrador";
+const MASTER_USER = "admin";
 const MASTER_PASS = "12345678";
 
 const state = {

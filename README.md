@@ -4,7 +4,8 @@ Projeto backend + interface web para controle de manutenção de computadores em
 
 ## Funcionalidades web
 - Login para qualquer usuário existente no banco de dados (via API `/api/auth/login`).
-- Login utilizando credenciais cadastradas no banco (usuário/e-mail e senha).
+- Login com usuário e senha cadastrados no banco.
+- Usuário master criado automaticamente: `admin` com senha `12345678`.
 - Ajustes do sistema reservados para o usuário `anderson` na interface.
 - Botão de logout para encerrar sessão com segurança.
 - Cadastro de ordens com:
