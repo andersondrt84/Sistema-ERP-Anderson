@@ -271,7 +271,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const pass = document.getElementById("loginPass").value;
 
   // usuário master local
-  if (user.toLowerCase() === MASTER_USER && pass === MASTER_PASS) {
+  if (user.trim().toLowerCase() === MASTER_USER && pass.trim() === MASTER_PASS) {
     setLogged(true, MASTER_USER, "master-local-session");
     notify("Login efetuado com sucesso.");
     return;
