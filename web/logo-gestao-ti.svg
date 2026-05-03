@@ -1,0 +1,9 @@
+<svg width="220" height="90" viewBox="0 0 220 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="2" width="86" height="86" rx="18" fill="#E9F2EC" stroke="#7EA78A" stroke-width="3"/>
+  <path d="M24 30H66" stroke="#2F5D3A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M24 46H56" stroke="#2F5D3A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M24 62H46" stroke="#2F5D3A" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="64" cy="62" r="10" fill="#7ACB8D"/>
+  <text x="100" y="40" fill="#1F3A27" font-size="30" font-family="Arial, sans-serif" font-weight="700">Gestão TI</text>
+  <text x="100" y="62" fill="#4F6255" font-size="14" font-family="Arial, sans-serif">Assistência Técnica</text>
+</svg>

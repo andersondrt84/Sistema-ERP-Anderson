@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: erp_pass
+      POSTGRES_DB: erp_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://erp_user:erp_pass@db:5432/erp_db
+      SECRET_KEY: troque-esta-chave-em-producao
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+    expose:
+      - "8000"
+
+  web-http:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "7000:80"
+
+
+  rclone:
+    image: rclone/rclone:latest
+    profiles: ["backup"]
+    volumes:
+      - ./rclone:/config/rclone
+      - ./backups:/backups
+    working_dir: /workspace
+    entrypoint: ["rclone"]
+
+volumes:
+  postgres_data:
