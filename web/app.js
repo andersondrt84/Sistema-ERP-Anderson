@@ -5,6 +5,8 @@ const MASTER_PASS = "12345678";
 const state = {
   orders: JSON.parse(localStorage.getItem("erp_orders") || "[]"),
   cash: JSON.parse(localStorage.getItem("erp_cash") || "[]"),
+  expenses: JSON.parse(localStorage.getItem("erp_expenses") || "[]"),
+  expenseFilterMonth: "",
   nextOrderId: Number(localStorage.getItem("erp_next_order_id") || "1"),
   logged: sessionStorage.getItem("erp_logged") === "1",
   currentUser: sessionStorage.getItem("erp_current_user") || "",
@@ -16,10 +18,12 @@ const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
 const ordersTable = document.getElementById("ordersTable");
 const cashTable = document.getElementById("cashTable");
+const expenseTable = document.getElementById("expenseTable");
 
 function saveLocalData() {
   localStorage.setItem("erp_orders", JSON.stringify(state.orders));
   localStorage.setItem("erp_cash", JSON.stringify(state.cash));
+  localStorage.setItem("erp_expenses", JSON.stringify(state.expenses));
   localStorage.setItem("erp_next_order_id", String(state.nextOrderId));
 }
 
@@ -195,6 +199,30 @@ function renderCash() {
   document.getElementById("cashTotal").textContent = money(totalCaixa);
 }
 
+function renderExpenses() {
+  const selectedMonth = state.expenseFilterMonth || new Date().toISOString().slice(0, 7);
+  const monthExpenses = state.expenses.filter((e) => String(e.data || "").startsWith(selectedMonth));
+
+  if (expenseTable) {
+    expenseTable.innerHTML = monthExpenses
+      .map((e) => `<tr><td>${e.data}</td><td>${e.tipo}</td><td>${money(e.valor)}</td></tr>`)
+      .join("");
+
+    if (!monthExpenses.length) {
+      expenseTable.innerHTML = '<tr><td colspan="3">Sem gastos para o mês selecionado</td></tr>';
+    }
+  }
+
+  const total = monthExpenses.reduce((sum, e) => sum + Number(e.valor || 0), 0);
+  const totalEl = document.getElementById("expenseMonthTotal");
+  if (totalEl) totalEl.textContent = money(total);
+
+  const monthEl = document.getElementById("expenseMonth");
+  if (monthEl && !monthEl.value) {
+    monthEl.value = selectedMonth;
+  }
+}
+
 function renderReports() {
   const totalOrdens = state.orders.length;
   const totalOrdemValor = state.orders.reduce((sum, o) => sum + Number(o.valor), 0);
@@ -246,6 +274,7 @@ function renderReports() {
 function renderAll() {
   renderOrders();
   renderCash();
+  renderExpenses();
   renderReports();
   applyAdminVisibility();
 }
@@ -350,6 +379,32 @@ document.getElementById("cashForm").addEventListener("submit", (e) => {
   renderAll();
   e.target.reset();
   notify("Lançamento realizado no caixa.");
+});
+
+document.getElementById("expenseForm")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const expense = {
+    data: document.getElementById("expenseDate").value,
+    tipo: document.getElementById("expenseType").value.trim(),
+    valor: document.getElementById("expenseValue").value,
+  };
+
+  state.expenses.unshift(expense);
+  if (!state.expenseFilterMonth) {
+    state.expenseFilterMonth = String(expense.data || "").slice(0, 7);
+  }
+  saveLocalData();
+  renderAll();
+  e.target.reset();
+  notify("Gasto lançado com sucesso.");
+});
+
+document.getElementById("expenseFilterForm")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const monthValue = document.getElementById("expenseMonth").value;
+  state.expenseFilterMonth = monthValue || "";
+  renderExpenses();
+  notify("Consulta de gastos atualizada.");
 });
 
 document.getElementById("passForm").addEventListener("submit", (e) => {

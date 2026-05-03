@@ -44,6 +44,7 @@
         <nav class="tabs">
           <button class="tab active" data-tab="ordens">📋 Ordens</button>
           <button class="tab" data-tab="caixa">💵 Caixa</button>
+          <button class="tab" data-tab="gastos">🧾 Gastos</button>
           <button class="tab" data-tab="relatorios">📊 Relatórios</button>
           <button class="tab" data-tab="seguranca">🔑 Alterar Senha</button>
           <a class="tab link-tab" href="/docs">API Docs</a>
@@ -158,6 +159,45 @@
                 </tr>
               </thead>
               <tbody id="cashTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        
+        <div class="panel" id="tab-gastos">
+          <h3>Controle de gastos da casa</h3>
+          <form id="expenseForm" class="form-grid three-cols">
+            <label>Data
+              <input id="expenseDate" type="date" required />
+            </label>
+            <label>Tipo / Categoria
+              <input id="expenseType" placeholder="Ex: Mercado, Luz, Internet" required />
+            </label>
+            <label>Valor gasto (R$)
+              <input id="expenseValue" type="number" min="0" step="0.01" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Lançar gasto</button>
+          </form>
+
+          <form id="expenseFilterForm" class="form-grid two-cols">
+            <label>Mês para consulta
+              <input id="expenseMonth" type="month" />
+            </label>
+            <button type="submit" class="btn btn-primary">Consultar mês</button>
+          </form>
+
+          <p class="cash-total">Total do mês consultado: <strong id="expenseMonthTotal">R$ 0,00</strong></p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTable"></tbody>
             </table>
           </div>
         </div>
